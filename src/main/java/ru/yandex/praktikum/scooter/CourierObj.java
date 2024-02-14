@@ -26,6 +26,18 @@ public class CourierObj {
                 .when()
                 .post(CREATE_COURIER_LOGIN);
     }
+    @Step("Получение id курьера")
+    public String getCourierId(Courier courier) {
+        Response response = RestAssured.given()
+                .header("Content-type", "application/json")
+                .body(courier)
+                .when()
+                .post(CREATE_COURIER_LOGIN);
+        return response.jsonPath().getString("id");
+
+    }
+
+
 
 
 }
