@@ -1,5 +1,4 @@
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.qameta.allure.Description;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -7,27 +6,27 @@ import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Test;
 import ru.yandex.praktikum.scooter.CourierObj;
-import ru.yandex.praktikum.scooter.POJO.Courier;
+import ru.yandex.praktikum.scooter.pojo.Courier;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 
 public class CreateCourierTest extends BaseTest {
     String idCourier;
+    CourierObj courierObj = new CourierObj();
 
     @Test
     @DisplayName("Создание учетной записи курьера со всеми полями")
     @Description("Успешный запрос должен возвращать статус код - 201 и ok: true")
     public void createCourierWithAllData() {
-        CourierObj courierObj = new CourierObj();
         String login = RandomStringUtils.randomAlphanumeric(3, 10);
         String password = RandomStringUtils.randomAlphanumeric(3, 10);
         String firstName = RandomStringUtils.randomAlphabetic(3, 10);
         Courier courier = new Courier(login, password, firstName);
 
-        idCourier = courierObj.getCourierId(courier);
-
         Response response = courierObj.createCourier(courier);
         response.then().assertThat().body("ok", equalTo(true)).and().statusCode(201);
+
+        idCourier = courierObj.getCourierId(courier);
 
     }
 
@@ -35,8 +34,6 @@ public class CreateCourierTest extends BaseTest {
     @DisplayName("Создание 2х одинаковых учетных записей курьеров")
     @Description("Нельзя создать одинаковых курьеров")
     public void tryCreateEqualsCouriers() {
-
-        CourierObj courierObj = new CourierObj();
         String login = RandomStringUtils.randomAlphanumeric(3, 10);
         String password = RandomStringUtils.randomAlphanumeric(3, 10);
         String firstName = RandomStringUtils.randomAlphabetic(3, 10);
@@ -54,7 +51,6 @@ public class CreateCourierTest extends BaseTest {
     @DisplayName("Создание учетной записи курьера без пароля")
     @Description("Если одного из полей нет, запрос возвращает ошибку")
     public void createCourierWithoutPassword() {
-        CourierObj courierObj = new CourierObj();
         String login = RandomStringUtils.randomAlphanumeric(3, 10);
         String password = "";
         String firstName = RandomStringUtils.randomAlphabetic(3, 10);
@@ -68,7 +64,6 @@ public class CreateCourierTest extends BaseTest {
     @DisplayName("Создание учетной записи курьера без логина")
     @Description("Если одного из полей нет, запрос возвращает ошибку")
     public void createCourierWithoutLogin() {
-        CourierObj courierObj = new CourierObj();
         String login = "";
         String password = RandomStringUtils.randomAlphanumeric(3, 10);
         String firstName = RandomStringUtils.randomAlphabetic(3, 10);
@@ -79,10 +74,9 @@ public class CreateCourierTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("Сохдание учетной записи курьера с уже существующим логином")
+    @DisplayName("Создание учетной записи курьера с уже существующим логином")
     @Description("Если создать курьера с уже существующим логином возвращается ошибка")
     public void tryCreateCouriersWithEqualLogins() {
-        CourierObj courierObj = new CourierObj();
         String login = RandomStringUtils.randomAlphanumeric(3, 10);
         String password = RandomStringUtils.randomAlphanumeric(3, 10);
         String firstName = RandomStringUtils.randomAlphabetic(3, 10);
@@ -90,27 +84,23 @@ public class CreateCourierTest extends BaseTest {
         courierObj.createCourier(courier);
 
         idCourier = courierObj.getCourierId(courier);
+        System.out.println(idCourier);
 
-        Courier courier_1 = new Courier();
-        courier_1.setLogin(login);
-        courier_1.setPassword(RandomStringUtils.randomAlphanumeric(3, 10));
-        courier_1.setFirstName(RandomStringUtils.randomAlphanumeric(3, 10));
+        courier.setLogin(login);
+        courier.setPassword(RandomStringUtils.randomAlphanumeric(3, 10));
+        courier.setFirstName(RandomStringUtils.randomAlphanumeric(3, 10));
 
-        Response response = courierObj.createCourier(courier_1);
+        Response response = courierObj.createCourier(courier);
         response.then().assertThat().body("message", equalTo("Этот логин уже используется. Попробуйте другой.")).and().statusCode(409);
 
 
     }
 
     @After
-    public void deleteCourierData() {
+    public void deleteCourier() {
         if (idCourier != null) {
-            Response deletion = RestAssured
-                    .given()
-                    .when()
-                    .delete("/api/v1/courier/{id}", idCourier);
-
-            deletion.then().assertThat().statusCode(200).and().body("ok", Matchers.is(true));
+            Response deletion = courierObj.deleteCourier(idCourier);
+            deletion.then().log().all().assertThat().statusCode(200).and().body("ok", Matchers.is(true));
         }
 
 

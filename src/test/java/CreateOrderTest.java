@@ -8,13 +8,15 @@ import org.junit.runners.Parameterized;
 
 import java.util.List;
 
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import ru.yandex.praktikum.scooter.POJO.Order;
+
+import ru.yandex.praktikum.scooter.OrderObj;
+import ru.yandex.praktikum.scooter.pojo.Order;
 @RunWith(Parameterized.class)
 public class CreateOrderTest extends BaseTest{
+    OrderObj orderObj = new OrderObj();
     Order order;
-    int idOrder;
+    int trackOrder;
 
     public CreateOrderTest(Order order){
         this.order = order;
@@ -34,28 +36,16 @@ public class CreateOrderTest extends BaseTest{
     @DisplayName("Создание заказа")
     @Description("Проверка создания заказа со всевозможным набором значений параметра color")
     public void createOrder() {
-        Response response = given()
-                .header("Content-type", "application/json")
-                .and()
-                .body(order)
-                .post("/api/v1/orders");
-        response.then().assertThat().statusCode(201)
-                .and()
-                .body("track",notNullValue());
-        idOrder = response.then().extract().path("track");
-
+        Response response = orderObj.createOrder(order);
+        response.then().assertThat().statusCode(201).and().body("track",notNullValue());
+        trackOrder = response.then().extract().path("track");
 
     }
+
     @After
     public void cancelOrder() {
-        System.out.println(idOrder);
-        given()
-                .header("Content-type", "application/json")
-                .body("{\"track\":" + idOrder + "}")
-                .when()
-                .put("/api/v1/orders/cancel");
-
-
+        System.out.println(trackOrder);
+        orderObj.cancelOrder(trackOrder);
     }
 
 }

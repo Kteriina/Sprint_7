@@ -1,5 +1,4 @@
-package ru.yandex.praktikum.scooter.POJO;
-
+package ru.yandex.praktikum.scooter.pojo;
 public class Courier {
 
     private String login;

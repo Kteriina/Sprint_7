@@ -1,4 +1,4 @@
-package ru.yandex.praktikum.scooter.POJO;
+package ru.yandex.praktikum.scooter.pojo;
 
 import java.util.List;
 
@@ -102,4 +102,5 @@ public class Order {
 
 
 }
+
 
